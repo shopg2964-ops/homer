@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SummitJambo — Connect. Communicate. Change.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F8F9FA;
+    --surface: #FFFFFF;
+    --surface-2: #F1F3F4;
+    --text: #1A1D20;
+    --text-secondary: #5C646D;
+    --brand: #006644;
+    --brand-soft: #0066441a;
+    --security: #10B981;
+    --alert: #EF4444;
+    --border: #E4E7EA;
+    --shadow: 0 16px 40px -22px rgba(26,29,32,0.22);
+    --radius: 14px;
+  }
+  [data-theme="dark"] {
+    --bg: #0B0E11;
+    --surface: #151B22;
+    --surface-2: #1B222B;
+    --text: #F0F4F8;
+    --text-secondary: #94A3B8;
+    --brand: #00B074;
+    --brand-soft: #00b07426;
+    --security: #34D399;
+    --alert: #F87171;
+    --border: #232B34;
+    --shadow: 0 16px 50px -22px rgba(0,0,0,0.55);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    transition: background 0.35s ease, color 0.35s ease;
+  }
+  h1, h2, h3, .display { font-family: 'Sora', sans-serif; letter-spacing: -0.02em; }
+  a, button, input[type="file"]::file-selector-button, .tab-btn, .job-apply, .assist-fab, .theme-toggle, .send-cmd {
+    cursor: pointer;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--brand); color: #fff; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--brand);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  /* NAV */
+  nav.top {
+    position: sticky; top: 0; z-index: 60;
+    backdrop-filter: blur(14px);
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.top .wrap { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; }
+  .logo { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+  .logo-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--brand); display: grid; place-items: center; flex-shrink: 0; }
+  .logo-mark svg { width: 15px; height: 15px; }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .theme-toggle {
+    width: 42px; height: 24px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); position: relative; flex-shrink: 0;
+  }
+  .theme-toggle::after {
+    content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+    border-radius: 50%; background: var(--brand); transition: transform 0.25s ease;
+  }
+  [data-theme="dark"] .theme-toggle::after { transform: translateX(18px); }
+
+  /* TAB BAR */
+  .tabbar-shell { border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 57px; z-index: 55; }
+  .tabbar { display: flex; gap: 4px; overflow-x: auto; padding: 10px 32px; max-width: 1100px; margin: 0 auto; scrollbar-width: none; }
+  .tabbar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 500;
+    color: var(--text-secondary); background: transparent; border: none;
+    padding: 9px 15px; border-radius: 9px; white-space: nowrap;
+    display: flex; align-items: center; gap: 8px; transition: background 0.2s, color 0.2s;
+  }
+  .tab-btn svg { width: 15px; height: 15px; opacity: 0.75; }
+  .tab-btn:hover { background: var(--surface-2); color: var(--text); }
+  .tab-btn.active { background: var(--brand); color: #fff; }
+  .tab-btn.active svg { opacity: 1; }
+
+  main { min-height: 60vh; }
+  .panel { display: none; padding: 56px 0 72px; animation: rise 0.35s ease; }
+  .panel.active { display: block; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .panel-head { max-width: 640px; margin-bottom: 40px; }
+  .panel-head h2 { font-size: clamp(1.55rem, 3vw, 2.15rem); margin-top: 12px; font-weight: 700; }
+  .panel-head p { color: var(--text-secondary); margin-top: 12px; line-height: 1.6; }
+
+  /* OVERVIEW / HERO */
+  .hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 44px; align-items: center; }
+  .hero h1 { font-size: clamp(2.2rem, 4.6vw, 3.3rem); line-height: 1.06; margin: 16px 0 18px; font-weight: 700; }
+  .hero h1 em { font-style: normal; color: var(--brand); }
+  .hero p.lead { font-size: 1.05rem; color: var(--text-secondary); max-width: 460px; line-height: 1.6; margin-bottom: 28px; }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn { padding: 12px 24px; border-radius: 10px; font-size: 0.92rem; font-weight: 600; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 8px; background: none; color: inherit; font-family: inherit; }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-ghost { border-color: var(--border); }
+  .btn-ghost:hover { background: var(--surface-2); }
+
+  .wave-stage { position: relative; width: 100%; aspect-ratio: 1/1; max-width: 380px; margin: 0 auto; }
+  .wave-stage svg { width: 100%; height: 100%; }
+  .ring { fill: none; stroke: var(--brand); stroke-width: 1.3; transform-origin: center; animation: pulse 3.6s ease-out infinite; }
+  .ring:nth-child(2) { animation-delay: 0.9s; opacity: 0.7; }
+  .ring:nth-child(3) { animation-delay: 1.8s; opacity: 0.45; }
+  .ring:nth-child(4) { animation-delay: 2.7s; opacity: 0.25; }
+  @keyframes pulse { 0% { transform: scale(0.28); opacity: 0.9; } 100% { transform: scale(1); opacity: 0; } }
+  .node { fill: var(--brand); }
+  .node.center { fill: var(--security); }
+  @media (prefers-reduced-motion: reduce) { .ring { animation: none; opacity: 0.45; } .panel { animation: none; } }
+
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 44px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+  .card .icon { width: 36px; height: 36px; border-radius: 9px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; margin-bottom: 14px; }
+  .card h3 { font-size: 0.98rem; margin-bottom: 6px; font-weight: 600; }
+  .card p { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.55; }
+
+
+  .connect-code-box{margin-top:12px;padding:14px;border:1px dashed var(--brand);border-radius:12px;background:var(--brand-soft)}
+  .connect-code{font-family:'IBM Plex Mono',monospace;font-size:1.35rem;font-weight:700;letter-spacing:.14em;text-align:center;padding:10px;background:var(--surface);border-radius:9px;margin:8px 0}
+  .connect-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+  .mesh-status{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-secondary);margin-top:9px}.mesh-dot{width:8px;height:8px;border-radius:50%;background:#f59e0b}.mesh-dot.online{background:var(--security)}
+
+  /* PRIVACY */
+  .security-inner { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 44px; align-items: center; }
+  .shield { width: 88px; height: 88px; border-radius: 22px; background: var(--brand-soft); display: grid; place-items: center; color: var(--security); margin-bottom: 18px; }
+  .check-list { display: flex; flex-direction: column; gap: 16px; }
+  .check-item { display: flex; gap: 13px; align-items: flex-start; }
+  .check-item .dot { width: 19px; height: 19px; border-radius: 50%; background: var(--security); flex-shrink: 0; margin-top: 3px; display: grid; place-items: center; }
+  .check-item .dot::after { content: '✓'; color: #fff; font-size: 0.6rem; }
+  .check-item strong { display: block; font-size: 0.95rem; margin-bottom: 2px; }
+  .check-item span { color: var(--text-secondary); font-size: 0.88rem; }
+
+  /* LEARNING CENTRE */
+  .split-ratio { display: flex; align-items: center; gap: 16px; margin: 18px 0 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 6px; max-width: 320px; }
+  .split-ratio .seg { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; text-align: center; padding: 8px 0; border-radius: 999px; font-weight: 500; }
+  .split-ratio .theory { flex: 3; color: var(--text-secondary); }
+  .split-ratio .practice { flex: 7; background: var(--brand); color: #fff; }
+  .stage-list { display: flex; flex-direction: column; margin-top: 8px; }
+  .stage { display: grid; grid-template-columns: 82px 1fr; gap: 22px; padding: 24px 0; border-top: 1px solid var(--border); }
+  .stage:last-child { border-bottom: 1px solid var(--border); }
+  .stage-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; color: var(--brand); padding-top: 3px; }
+  .stage h3 { font-size: 1.05rem; margin-bottom: 7px; font-weight: 600; }
+  .stage p { color: var(--text-secondary); font-size: 0.9rem; max-width: 600px; line-height: 1.6; }
+
+  /* CAREERS */
+  .careers-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 36px; align-items: start; }
+  .match-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); position: sticky; top: 130px; }
+  .match-box h3 { font-size: 1.02rem; margin-bottom: 6px; font-weight: 600; }
+  .match-box p.hint { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.5; }
+  .field-label { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; display: block; margin-bottom: 6px; }
+  .upload-zone {
+    border: 1.5px dashed var(--border); border-radius: 12px; padding: 20px;
+    text-align: center; margin-bottom: 16px; background: var(--surface-2);
+  }
+  .upload-zone input[type="file"] { font-size: 0.82rem; width: 100%; color: var(--text-secondary); }
+  .upload-zone .file-name { font-size: 0.8rem; color: var(--brand); margin-top: 8px; font-weight: 500; }
+  textarea#cvText {
+    width: 100%; min-height: 110px; resize: vertical; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; font-family: 'Inter', sans-serif; font-size: 0.88rem;
+    background: var(--bg); color: var(--text); margin-bottom: 16px;
+  }
+  .btn-block { width: 100%; justify-content: center; }
+  .job-list { display: flex; flex-direction: column; gap: 14px; }
+  .job-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+  .job-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 8px; }
+  .job-top h3 { font-size: 1rem; font-weight: 600; }
+  .job-top .team { font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px; }
+  .match-score { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; font-weight: 500; padding: 5px 10px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); white-space: nowrap; }
+  .job-card p.blurb { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.55; margin-bottom: 12px; }
+  .meter { height: 6px; border-radius: 4px; background: var(--surface-2); overflow: hidden; margin-bottom: 12px; }
+  .meter > span { display: block; height: 100%; background: var(--brand); border-radius: 4px; transition: width 0.5s ease; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chip { font-size: 0.74rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-secondary); }
+  .chip.hit { background: var(--brand-soft); color: var(--brand); border-color: transparent; font-weight: 500; }
+  .job-apply { font-size: 0.85rem; font-weight: 600; color: var(--brand); display: inline-flex; align-items: center; gap: 6px; }
+
+  /* MISSION */
+  .mission { background: var(--brand); color: #fff; border-radius: 22px; padding: 48px; }
+  [data-theme="dark"] .mission { color: #06120c; }
+  .mission h2 { font-size: clamp(1.4rem, 2.8vw, 2rem); max-width: 620px; margin-bottom: 14px; }
+  .mission p { max-width: 540px; opacity: 0.92; line-height: 1.6; margin-bottom: 26px; }
+  .stat-row { display: flex; gap: 36px; flex-wrap: wrap; }
+  .stat b { font-size: 1.7rem; display: block; font-family: 'Sora', sans-serif; }
+  .stat span { font-size: 0.8rem; opacity: 0.85; }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 0; }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; }
+  footer .tag { color: var(--text-secondary); font-size: 0.82rem; }
+
+  /* COMMAND ASSISTANT */
+  .assist-fab {
+    position: fixed; bottom: 24px; right: 24px; z-index: 90;
+    background: var(--text); color: var(--bg); border: none; border-radius: 999px;
+    padding: 13px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem;
+    display: flex; align-items: center; gap: 9px; box-shadow: 0 12px 30px -10px rgba(0,0,0,0.4);
+  }
+  .assist-fab kbd { border: 1px solid color-mix(in srgb, var(--bg) 40%, transparent); border-radius: 4px; padding: 1px 6px; font-size: 0.7rem; opacity: 0.8; }
+
+  .assist-overlay {
+    position: fixed; inset: 0; background: rgba(10,12,14,0.5); backdrop-filter: blur(2px);
+    z-index: 100; display: none; align-items: flex-start; justify-content: center; padding-top: 12vh;
+  }
+  .assist-overlay.open { display: flex; }
+  .assist-panel {
+    width: min(560px, 92vw); background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; box-shadow: 0 30px 70px -20px rgba(0,0,0,0.45); overflow: hidden;
+  }
+  .assist-input-row { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .assist-input-row svg { flex-shrink: 0; color: var(--brand); }
+  #assistInput { flex: 1; border: none; background: transparent; font-size: 0.98rem; color: var(--text); font-family: 'Inter', sans-serif; }
+  #assistInput:focus { outline: none; }
+  .send-cmd { border: none; background: var(--brand); color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; font-weight: 600; }
+  .assist-log { max-height: 46vh; overflow-y: auto; padding: 10px 18px 18px; font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; }
+  .assist-log .line { padding: 7px 0; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+  .assist-log .line:last-child { border-bottom: none; }
+  .assist-log .line .cmd { color: var(--text); }
+  .assist-log .line .resp { color: var(--brand); }
+  .assist-hints { padding: 12px 18px 16px; display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--border); }
+  .hint-chip { font-size: 0.74rem; border: 1px solid var(--border); border-radius: 999px; padding: 5px 11px; color: var(--text-secondary); }
+  .hint-chip:hover { background: var(--surface-2); }
+
+  @media (max-width: 860px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .grid3 { grid-template-columns: 1fr 1fr; }
+    .security-inner { grid-template-columns: 1fr; }
+    .stage { grid-template-columns: 1fr; }
+    .careers-grid { grid-template-columns: 1fr; }
+    .match-box { position: static; }
+    .mission { padding: 32px 22px; }
+  }
+  @media (max-width: 560px) {
+    .grid3 { grid-template-columns: 1fr; }
+    .wrap { padding: 0 20px; }
+    nav.top .wrap { padding: 14px 20px; }
+    .assist-fab span.label { display: none; }
+  }
+
+  /* CONFERENCE STUDIO */
+  .conference-shell{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.65fr);gap:18px}
+  .meeting-stage{background:#070a0d;border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);min-height:520px;position:relative}
+  .meeting-top{height:54px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;background:#10151b;color:#fff}
+  .meeting-title{display:flex;align-items:center;gap:10px;font-size:.9rem;font-weight:600}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 5px rgba(239,68,68,.14)}
+  .meeting-state{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:#a9b4c0}
+  .video-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;padding:12px;min-height:410px;background:radial-gradient(circle at 50% 0,#16201d 0,#070a0d 52%)}
+  .video-tile{min-height:180px;border-radius:13px;background:#121820;border:1px solid #25303a;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .video-tile video{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+  .avatar{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:#1d2b27;color:#a7f3d0;font-weight:700;font-size:1.25rem}
+  .tile-name{position:absolute;left:10px;bottom:9px;background:rgba(0,0,0,.58);color:#fff;padding:5px 8px;border-radius:7px;font-size:.72rem;z-index:2}
+  .tile-status{position:absolute;right:10px;top:9px;color:#fff;background:rgba(0,0,0,.48);padding:4px 7px;border-radius:6px;font-size:.66rem;z-index:2}
+  .meeting-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:13px;background:#10151b}
+  .control{border:1px solid #303a44;background:#192129;color:#fff;border-radius:10px;padding:10px 13px;font:600 .75rem Inter,sans-serif;display:inline-flex;align-items:center;gap:7px}
+  .control:hover{background:#25313c}.control.active{background:var(--brand);border-color:var(--brand)}
+  .control.danger{background:#3a1719;border-color:#6b2427;color:#fecaca}
+  .side-stack{display:flex;flex-direction:column;gap:14px}
+  .side-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+  .side-card h3{font-size:.95rem;margin-bottom:10px}
+  .side-card p{font-size:.78rem;color:var(--text-secondary);line-height:1.5}
+  .meeting-form{display:grid;gap:9px}
+  .meeting-form input,.meeting-form select{width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font:inherit;font-size:.8rem}
+  .meeting-form label{font-size:.72rem;color:var(--text-secondary);font-weight:600}
+  .room-link{display:none;margin-top:10px;padding:9px;border-radius:9px;background:var(--brand-soft);font-family:'IBM Plex Mono',monospace;font-size:.68rem;word-break:break-all;color:var(--brand)}
+  .room-link.show{display:block}
+  .participant-list{display:flex;flex-direction:column;gap:8px;max-height:170px;overflow:auto}
+  .participant{display:flex;align-items:center;gap:9px;font-size:.78rem}
+  .mini-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);font-weight:700;font-size:.7rem}
+  .participant .role{margin-left:auto;color:var(--text-secondary);font-size:.66rem}
+  .recording-row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
+  .rec-badge{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:#ef4444;display:none}.rec-badge.on{display:inline}
+  .studio-note{font-size:.7rem!important;margin-top:8px}
+  @media(max-width:860px){.conference-shell{grid-template-columns:1fr}.meeting-stage{min-height:430px}.video-grid{min-height:320px}}
+
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <div class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="2" fill="#fff"/></svg></span>
+      SummitJambo
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" aria-label="Toggle dark mode" onclick="toggleTheme()"></button>
+    </div>
+  </div>
+</nav>
+
+<div class="tabbar-shell">
+  <div class="tabbar" role="tablist">
+    <button class="tab-btn active" data-tab="overview" onclick="showTab('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Overview</button>
+    <button class="tab-btn" data-tab="conference" onclick="showTab('conference')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3M7 8h.01M12 8h.01M17 8h.01"/></svg>Conferences</button>
+    <button class="tab-btn" data-tab="talk" onclick="showTab('talk')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.5-2.3a1 1 0 011.5.9v6.8a1 1 0 01-1.5.9L15 14M4 6h9a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>Talk &amp; Connect</button>
+    <button class="tab-btn" data-tab="privacy" onclick="showTab('privacy')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/></svg>Privacy</button>
+    <button class="tab-btn" data-tab="learning" onclick="showTab('learning')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l9-3 9 3-9 3-9-3zM3 6v9l9 3 9-3V6"/></svg>Learning Centre</button>
+    <button class="tab-btn" data-tab="careers" onclick="showTab('careers')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h16v11H4zM8 8V6a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Careers</button>
+    <button class="tab-btn" data-tab="mission" onclick="showTab('mission')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a12 12 0 000 18M3 12h18"/></svg>Mission</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- OVERVIEW -->
+  <section id="overview" class="panel active">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">Built in Burundi, for Africa and the world</span>
+        <h1 class="hero-h">Jambo. <em>The world just got closer.</em></h1>
+        <p class="lead">SummitJambo is a communication platform for people who need more than a chat app — real conversation, real security, and a place to turn what you're learning into something the world can use.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" onclick="showTab('talk')">See how it works</a>
+          <a class="btn btn-ghost" onclick="showTab('careers')">View open roles</a>
+        </div>
+      </div>
+      <div class="wave-stage" aria-hidden="true">
+        <svg viewBox="0 0 400 400">
+          <circle class="ring" cx="200" cy="200" r="60"/><circle class="ring" cx="200" cy="200" r="60"/>
+          <circle class="ring" cx="200" cy="200" r="60"/><circle class="ring" cx="200" cy="200" r="60"/>
+          <circle class="node" cx="120" cy="140" r="5"/><circle class="node" cx="290" cy="120" r="4"/>
+          <circle class="node" cx="310" cy="260" r="5"/><circle class="node" cx="110" cy="280" r="4"/>
+          <circle class="node" cx="200" cy="90" r="4"/><circle class="node center" cx="200" cy="200" r="9"/>
+        </svg>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="card"><div class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.5-2.3a1 1 0 011.5.9v6.8a1 1 0 01-1.5.9L15 14M4 6h9a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg></div><h3>Real conversation</h3><p>Voice, video, and messages built to feel like presence, not just delivery.</p></div>
+      <div class="card"><div class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/></svg></div><h3>Private by default</h3><p>End-to-end encryption, chat lock, and two-step verification, all switched on.</p></div>
+      <div class="card"><div class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l9-3 9 3-9 3-9-3zM3 6v9l9 3 9-3V6"/></svg></div><h3>Learning that ships</h3><p>A centre where 70% of the work is building real solutions, not reading about them.</p></div>
+    </div>
+  </section>
+
+  <!-- TALK & CONNECT -->
+  <section id="talk" class="panel">
+    <div class="panel-head">
+      <span class="eyebrow">Talk &amp; connect</span>
+      <h2>Every conversation, built to feel like you're in the room.</h2>
+      <p>Voice notes, video calls, group calls, and messages that carry emotion, not just text — designed for real bandwidth conditions, not just showroom Wi-Fi.</p>
+    </div>
+    <div class="grid3">
+      <div class="card"><div class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.5-2.3a1 1 0 011.5.9v6.8a1 1 0 01-1.5.9L15 14M4 6h9a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg></div><h3>Audio &amp; video calling</h3><p>One tap to start a voice-only or face-to-face call, with mute, camera flip, and speaker switching built in.</p></div>
+      <div class="card"><div class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2M3 8h10a2 2 0 012 2v6a2 2 0 01-2 2H3z"/></svg></div><h3>Group calls &amp; screen share</h3><p>Bring everyone onto one call with a shared link, then share your screen when it's easier to show than tell.</p></div>
+      <div class="card"><div class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a4 4 0 00-4 4v6a4 4 0 008 0V5a4 4 0 00-4-4z"/><path d="M19 10v1a7 7 0 01-14 0v-1M12 18v4"/></svg></div><h3>Voice messages</h3><p>Lock the mic to record hands-free, preview before you send, and play long messages back at double speed.</p></div>
+      <div class="card"><div class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></div><h3>Edit &amp; react</h3><p>Fix a message up to 15 minutes after sending, reply directly to any text, or drop a reaction without breaking the flow.</p></div>
+      <div class="card"><div class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div><h3>Events &amp; call links</h3><p>Send an invite straight into the chat instead of going back and forth, and let the group RSVP where the conversation already lives.</p></div>
+      <div class="card"><div class="icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l6 6L20 6"/></svg></div><h3>Attachments that just work</h3><p>Photos, live video, documents, or a location — one button, no hunting through menus.</p></div>
+    </div>
+  </section>
+
+
+  <!-- CONFERENCE STUDIO -->
+  <section id="conference" class="panel">
+    <div class="panel-head">
+      <span class="eyebrow">Conference studio</span>
+      <h2>Host meetings, webinars and collaborative sessions.</h2>
+      <p>Create a room, invite participants, share your screen, control your microphone and camera, and record the session. The interface is wired for LiveKit's realtime API and server-side Egress recording.</p>
+    </div>
+
+    <div class="conference-shell">
+      <div class="meeting-stage">
+        <div class="meeting-top">
+          <div class="meeting-title"><span class="live-dot" id="liveDot"></span><span id="meetingTitle">SummitJambo Conference</span></div>
+          <span class="meeting-state" id="meetingState">READY</span>
+        </div>
+        <div class="video-grid" id="videoGrid">
+          <div class="video-tile" id="localTile">
+            <div class="avatar" id="localAvatar">SJ</div>
+            <video id="localVideo" autoplay playsinline muted></video>
+            <span class="tile-name" id="localName">You</span>
+            <span class="tile-status" id="localStatus">Camera off</span>
+          </div>
+          <div class="video-tile" id="emptyTile">
+            <div style="text-align:center;color:#718096;padding:20px">
+              <div style="font-size:1.7rem;margin-bottom:8px">＋</div>
+              <div style="font-size:.8rem">Participants will appear here</div>
+            </div>
+          </div>
+        </div>
+        <div class="meeting-controls">
+          <button class="control" id="micBtn" onclick="toggleMic()">🎙 Mic</button>
+          <button class="control" id="cameraBtn" onclick="toggleCamera()">📹 Camera</button>
+          <button class="control" id="screenBtn" onclick="toggleScreen()">🖥 Share screen</button>
+          <button class="control" id="recordBtn" onclick="toggleRecording()">⏺ Record</button>
+          <button class="control" onclick="toggleChatPanel()">💬 Chat</button>
+          <button class="control danger" onclick="leaveConference()">☎ Leave</button>
+        </div>
+      </div>
+
+      <div class="side-stack">
+        <div class="side-card">
+          <h3>Create / join conference</h3>
+          <div class="meeting-form">
+            <label for="roomName">Room name</label>
+            <input id="roomName" value="summit-demo" placeholder="e.g. youth-summit-2026">
+            <label for="displayName">Your name</label>
+            <input id="displayName" value="SummitJambo Host" placeholder="Your display name">
+            <label for="maxParticipants">Capacity</label>
+            <select id="maxParticipants">
+              <option>10</option><option selected>25</option><option>50</option><option>100</option><option>500</option>
+            </select>
+            <button class="btn btn-primary btn-block" onclick="createOrJoinConference()">Start / Join room</button>
+            <button class="btn btn-ghost btn-block" onclick="createConnectionCode()">Generate connection code</button>
+            <div class="connect-code-box">
+              <div style="font-size:.78rem;color:var(--text-secondary)">Send this code to someone — they can enter it to join the same conference.</div>
+              <div class="connect-code" id="connectionCode">--------</div>
+              <div class="connect-row"><input id="joinCode" placeholder="Enter code e.g. 7K2M-9Q4T"><button class="btn btn-primary" onclick="joinWithCode()">Connect</button></div>
+              <div class="mesh-status"><span class="mesh-dot" id="meshDot"></span><span id="meshStatus">Internet / mesh fallback ready</span></div>
+            </div>
+            <button class="btn btn-ghost btn-block" onclick="copyRoomLink()">Copy invite link</button>
+            <div id="roomLink" class="room-link"></div>
+          </div>
+          <p class="studio-note">Production mode requires a secure backend that issues LiveKit access tokens. Never put your LiveKit API secret in this HTML.</p>
+        </div>
+
+        <div class="side-card">
+          <h3>Participants <span id="participantCount">(1)</span></h3>
+          <div class="participant-list" id="participantList">
+            <div class="participant"><span class="mini-avatar">SJ</span><span id="participantSelf">SummitJambo Host</span><span class="role">Host</span></div>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <h3>Recording</h3>
+          <p>Use server-side LiveKit Egress for reliable MP4/HLS conference recordings. A local browser recorder is also available as a fallback.</p>
+          <div class="recording-row">
+            <span class="rec-badge" id="recBadge">● RECORDING</span>
+            <button class="btn btn-ghost" onclick="downloadLocalRecording()">Save local recording</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section id="privacy" class="panel">
+    <div class="security-inner">
+      <div>
+        <div class="shield"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h2 style="font-size:1.6rem; font-weight:700;">Privacy that's on by default, not an upsell.</h2>
+        <p style="color:var(--text-secondary); margin-top:12px; line-height:1.6;">A messaging app is only as good as the trust behind it. SummitJambo treats every conversation as private until you choose otherwise.</p>
+      </div>
+      <div class="check-list">
+        <div class="check-item"><div class="dot"></div><div><strong>End-to-end encryption, always on</strong><span>Messages and calls are secured in transit, with no server-side access to your content.</span></div></div>
+        <div class="check-item"><div class="dot"></div><div><strong>PIN &amp; two-step verification</strong><span>Add a second layer of protection so your account can't be taken over by your number alone.</span></div></div>
+        <div class="check-item"><div class="dot"></div><div><strong>Chat lock</strong><span>Keep your most personal conversations behind fingerprint or face unlock, tucked into their own folder.</span></div></div>
+        <div class="check-item"><div class="dot"></div><div><strong>Privacy checkup</strong><span>A guided walkthrough of your settings so you choose your protection level deliberately, not by default.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEARNING CENTRE -->
+  <section id="learning" class="panel">
+    <div class="panel-head">
+      <span class="eyebrow">Practical knowledge &amp; skills application centre</span>
+      <h2>Where studying stops being theoretical.</h2>
+      <p>Built on Summit International Institute's model — most of the work is doing, not reading. Every student leaves having made real progress on a real problem.</p>
+      <div class="split-ratio"><div class="seg theory">30% Theory</div><div class="seg practice">70% Practical Application</div></div>
+    </div>
+    <div class="stage-list">
+      <div class="stage"><div class="stage-num">01</div><div><h3>Discover a problem worth solving</h3><p>Start from a real issue affecting real people — not an attractive solution in search of a problem. Name who's affected and what happens if it stays unsolved.</p></div></div>
+      <div class="stage"><div class="stage-num">02</div><div><h3>Research, map, and match</h3><p>Pull knowledge from your own field and beyond it. See how others across the country, continent, and world have approached the same problem, then map what you know against what you still need.</p></div></div>
+      <div class="stage"><div class="stage-num">03</div><div><h3>Build, test, and take feedback</h3><p>Narrow to your strongest approach, set a timetable, and use AI and other tools where they genuinely help. Test the solution, take feedback that sharpens it, and set aside the feedback that doesn't.</p></div></div>
+      <div class="stage"><div class="stage-num">04</div><div><h3>Launch and keep improving</h3><p>Ship the finished solution, tell people it exists, and treat the feedback that follows as the start of the next version — not the end of the project.</p></div></div>
+    </div>
+  </section>
+
+  <!-- CAREERS -->
+  <section id="careers" class="panel">
+    <div class="panel-head">
+      <span class="eyebrow">Careers at SummitJambo</span>
+      <h2>Help build the platform, not just use it.</h2>
+      <p>Upload your CV or paste a short summary of your skills, and we'll rank our open roles by how closely they match.</p>
+    </div>
+    <div class="careers-grid">
+      <div class="match-box">
+        <h3>Find your match</h3>
+        <p class="hint">Works entirely in this browser — nothing is uploaded to a server. Plain-text CVs read directly; for PDF/Word files, paste a short summary below too for the best match.</p>
+        <span class="field-label">Upload CV</span>
+        <div class="upload-zone">
+          <input type="file" id="cvFile" accept=".txt,.md,.pdf,.doc,.docx" onchange="handleCvFile(event)">
+          <div class="file-name" id="cvFileName"></div>
+        </div>
+        <span class="field-label">Or paste your skills / summary</span>
+        <textarea id="cvText" placeholder="e.g. React Native developer with 3 years building offline-first mobile apps, some Python and community outreach experience..."></textarea>
+        <button class="btn btn-primary btn-block" onclick="runMatch()">Find my matches</button>
+      </div>
+      <div class="job-list" id="jobList"></div>
+    </div>
+  </section>
+
+  <!-- MISSION -->
+  <section id="mission" class="panel">
+    <div class="mission">
+      <span class="eyebrow" style="color:inherit; opacity:0.85;">The connectivity mission</span>
+      <h2>Signal from the air, for the five billion still waiting to get online.</h2>
+      <p>SummitJambo grew out of a simple ambition: build affordable, license-free wireless mesh networks — grounded in local hardware, solar power, and community operators — so the cost of a connection never stands between an idea and the person who needs it, starting with the youth of Africa.</p>
+      <div class="stat-row">
+        <div class="stat"><b>2.4–5 GHz</b><span>Unlicensed spectrum, zero recurring licensing cost</span></div>
+        <div class="stat"><b>Mesh, not towers</b><span>Nodes route around failure instead of depending on one</span></div>
+        <div class="stat"><b>Solar-powered</b><span>Built for places the grid hasn't reached yet</span></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="logo" style="font-size:0.95rem;">
+      <span class="logo-mark" style="width:22px;height:22px;"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="2" fill="#fff"/></svg></span>
+      SummitJambo
+    </div>
+    <span class="tag">A Summit International Institute initiative — connection and practical learning, built for Africa's next chapter.</span>
+  </div>
+</footer>
+
+<!-- COMMAND ASSISTANT -->
+<button class="assist-fab" onclick="openAssist()">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
+  <span class="label">Command</span>
+  <kbd>/</kbd>
+</button>
+
+<div class="assist-overlay" id="assistOverlay" onclick="if(event.target===this) closeAssist()">
+  <div class="assist-panel">
+    <div class="assist-input-row">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
+      <input id="assistInput" placeholder="Tell it what to do — “open careers”, “dark mode”, “find jobs for design”…" onkeydown="if(event.key==='Enter') runCommand()">
+      <button class="send-cmd" onclick="runCommand()">Run</button>
+    </div>
+    <div class="assist-log" id="assistLog">
+      <div class="line"><span class="resp">Ready.</span> Type an instruction below to jump to a tab, switch themes, or search open roles.</div>
+    </div>
+    <div class="assist-hints">
+      <span class="hint-chip" onclick="quickCmd('open careers')">open careers</span>
+      <span class="hint-chip" onclick="quickCmd('dark mode')">dark mode</span>
+      <span class="hint-chip" onclick="quickCmd('show privacy')">show privacy</span>
+      <span class="hint-chip" onclick="quickCmd('find jobs for engineering')">find jobs for engineering</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- Theme ----------
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+
+  // ---------- Tabs ----------
+  function showTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const panel = document.getElementById(name);
+    const btn = document.querySelector('.tab-btn[data-tab="' + name + '"]');
+    if (panel) panel.classList.add('active');
+    if (btn) btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ---------- Careers: job data + matching ----------
+  const jobs = [
+    { title: 'Mobile Engineer (React Native)', team: 'Talk & Connect', blurb: 'Build the calling and messaging experience across low-end and high-end Android devices.', keywords: ['react native','mobile','android','ios','javascript','typescript','offline','ui','app'] },
+    { title: 'WebRTC / Backend Engineer', team: 'Core Platform', blurb: 'Own the calling infrastructure — signalling, media routing, and adaptive bandwidth.', keywords: ['webrtc','backend','node','signalling','networking','video','audio','server','api'] },
+    { title: 'Network Field Engineer', team: 'Connectivity Mission', blurb: 'Deploy and maintain wireless mesh nodes across pilot sites in Burundi and beyond.', keywords: ['networking','wireless','mesh','radio','antenna','fieldwork','hardware','solar','rf'] },
+    { title: 'Security & Privacy Engineer', team: 'Trust & Safety', blurb: 'Harden encryption, chat lock, and account recovery against real-world abuse.', keywords: ['security','encryption','cryptography','privacy','pentest','infosec','python','auditing'] },
+    { title: 'Curriculum Designer', team: 'Learning Centre', blurb: 'Design the stage-by-stage journey students follow inside the Practical Knowledge Centre.', keywords: ['education','curriculum','teaching','instructional design','research','mentorship','writing'] },
+    { title: 'Community Outreach Lead', team: 'Connectivity Mission', blurb: 'Train local youth as network operators and run adoption in pilot communities.', keywords: ['community','outreach','training','communication','africa','partnerships','fieldwork'] },
+    { title: 'Product Designer', team: 'Core Platform', blurb: 'Shape the interaction design for calling, messaging, and the learning centre.', keywords: ['design','ui','ux','figma','prototyping','interaction design','accessibility'] }
+  ];
+
+  function renderJobs(scored) {
+    const list = document.getElementById('jobList');
+    list.innerHTML = '';
+    scored.forEach(j => {
+      const chipHtml = j.keywords.map(k => `<span class="chip ${j.hits.includes(k) ? 'hit' : ''}">${k}</span>`).join('');
+      list.insertAdjacentHTML('beforeend', `
+        <div class="job-card">
+          <div class="job-top">
+            <div><h3>${j.title}</h3><div class="team">${j.team}</div></div>
+            ${j.pct !== null ? `<span class="match-score">${j.pct}% match</span>` : ''}
+          </div>
+          <p class="blurb">${j.blurb}</p>
+          ${j.pct !== null ? `<div class="meter"><span style="width:${j.pct}%"></span></div>` : ''}
+          <div class="chip-row">${chipHtml}</div>
+          <a class="job-apply" href="mailto:careers@summitjambo.org?subject=Application: ${encodeURIComponent(j.title)}">Apply for this role →</a>
+        </div>`);
+    });
+  }
+
+  function initJobs() {
+    renderJobs(jobs.map(j => ({ ...j, hits: [], pct: null })));
+  }
+
+  function handleCvFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('cvFileName').textContent = file.name;
+    if (file.type === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const box = document.getElementById('cvText');
+        box.value = (box.value ? box.value + '\n' : '') + ev.target.result;
+      };
+      reader.readAsText(file);
+    } else {
+      document.getElementById('cvFileName').textContent = file.name + ' — attached (paste a short summary below for best matching)';
+    }
+  }
+
+  function scoreJobs(rawText) {
+    const text = (rawText || '').toLowerCase();
+    return jobs.map(j => {
+      const hits = j.keywords.filter(k => text.includes(k));
+      const pct = text.trim() ? Math.round((hits.length / j.keywords.length) * 100) : null;
+      return { ...j, hits, pct };
+    }).sort((a, b) => (b.pct || 0) - (a.pct || 0));
+  }
+
+  function runMatch(prefill) {
+    const text = prefill !== undefined ? prefill : document.getElementById('cvText').value;
+    if (prefill !== undefined) document.getElementById('cvText').value = prefill;
+    const scored = scoreJobs(text);
+    renderJobs(scored);
+    return scored;
+  }
+
+  // ---------- Command assistant ----------
+  function openAssist() {
+    document.getElementById('assistOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('assistInput').focus(), 50);
+  }
+  function closeAssist() { document.getElementById('assistOverlay').classList.remove('open'); }
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault(); openAssist();
+    }
+    if (e.key === 'Escape') closeAssist();
+  });
+
+  function logLine(cmd, resp) {
+    const log = document.getElementById('assistLog');
+    log.insertAdjacentHTML('beforeend', `<div class="line"><span class="cmd">&gt; ${cmd}</span><br><span class="resp">${resp}</span></div>`);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function quickCmd(text) {
+    document.getElementById('assistInput').value = text;
+    runCommand();
+  }
+
+  function runCommand() {
+    const input = document.getElementById('assistInput');
+    const raw = input.value.trim();
+    if (!raw) return;
+    const cmd = raw.toLowerCase();
+    let resp = "I didn't catch that — try naming a section, a theme, or a job keyword.";
+
+    if (/dark/.test(cmd)) { document.documentElement.setAttribute('data-theme', 'dark'); resp = 'Switched to dark mode.'; }
+    else if (/light/.test(cmd)) { document.documentElement.setAttribute('data-theme', 'light'); resp = 'Switched to light mode.'; }
+    else if (/career|job|hiring|role|vacan/.test(cmd)) {
+      showTab('careers');
+      const forMatch = cmd.match(/(?:for|in|matching)\s+([a-z\s]+)/);
+      if (forMatch) {
+        const scored = runMatch(forMatch[1].trim());
+        resp = `Opened Careers and ranked roles for "${forMatch[1].trim()}". Top match: ${scored[0].title} (${scored[0].pct}%).`;
+      } else {
+        resp = 'Opened Careers.';
+      }
+    }
+    else if (/privacy|security|encrypt/.test(cmd)) { showTab('privacy'); resp = 'Opened Privacy.'; }
+    else if (/learn|centre|center|student|curriculum|education/.test(cmd)) { showTab('learning'); resp = 'Opened the Learning Centre.'; }
+    else if (/mission|connectivity|internet|mesh/.test(cmd)) { showTab('mission'); resp = 'Opened the Mission.'; }
+    else if (/talk|call|messag|chat/.test(cmd)) { showTab('talk'); resp = 'Opened Talk & Connect.'; }
+    else if (/overview|home|start/.test(cmd)) { showTab('overview'); resp = 'Opened Overview.'; }
+    else if (/upload|cv|resume/.test(cmd)) { showTab('careers'); setTimeout(() => document.getElementById('cvFile').focus(), 300); resp = 'Opened Careers and focused the CV upload.'; }
+    else if (/top|scroll up/.test(cmd)) { window.scrollTo({top:0,behavior:'smooth'}); resp = 'Scrolled to top.'; }
+
+    logLine(raw, resp);
+    input.value = '';
+  }
+
+
+  // ---------- Conference Studio / LiveKit ----------
+  // Set these to your backend endpoints. The backend should create rooms and issue
+  // short-lived LiveKit tokens; API secrets must never be shipped to the browser.
+  const CONFERENCE_CONFIG = {
+    livekitWsUrl: '',
+    tokenEndpoint: '/api/livekit/token',
+    roomEndpoint: '/api/livekit/room',
+    recordingEndpoint: '/api/livekit/recording'
+  };
+
+  let conferenceRoom = null;
+  let localStream = null;
+  let localRecorder = null;
+  let localRecordingChunks = [];
+  let localRecordingUrl = null;
+  let localMicOn = false;
+  let localCameraOn = false;
+  let localScreenOn = false;
+  let serverRecording = false;
+
+  function setConferenceState(text) {
+    const el=document.getElementById('meetingState');
+    if(el) el.textContent=text.toUpperCase();
+  }
+
+  async function createConnectionCode(){
+    try{
+      const roomName=document.getElementById('roomName').value.trim() || 'summit-demo';
+      const displayName=document.getElementById('displayName').value.trim() || 'Host';
+      const r=await fetch('/api/connect/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({roomName,displayName,maxParticipants:Number(document.getElementById('maxParticipants').value)||25})});
+      const data=await r.json(); if(!r.ok) throw new Error(data.error||'Could not create code');
+      document.getElementById('connectionCode').textContent=data.code;
+      document.getElementById('meshDot').classList.add('online'); document.getElementById('meshStatus').textContent='Connection code active for 24 hours';
+      await navigator.clipboard?.writeText(data.code);
+    }catch(e){alert(e.message);}
+  }
+  async function joinWithCode(){
+    try{
+      const code=document.getElementById('joinCode').value.trim(); if(!code) return;
+      const r=await fetch('/api/connect/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+      const data=await r.json(); if(!r.ok) throw new Error(data.error||'Invalid code');
+      document.getElementById('roomName').value=data.roomName;
+      document.getElementById('meetingTitle').textContent=data.roomName;
+      document.getElementById('meshDot').classList.add('online'); document.getElementById('meshStatus').textContent='Connected code resolved — joining '+data.createdBy+''s room';
+      await createOrJoinConference();
+    }catch(e){alert(e.message);}
+  }
+
+  async function createOrJoinConference() {
+    const roomName=document.getElementById('roomName').value.trim() || 'summit-demo';
+    const displayName=document.getElementById('displayName').value.trim() || 'Guest';
+    const capacity=Number(document.getElementById('maxParticipants').value)||25;
+    document.getElementById('meetingTitle').textContent=roomName;
+    document.getElementById('localName').textContent=displayName;
+    document.getElementById('participantSelf').textContent=displayName;
+    document.getElementById('localAvatar').textContent=displayName.split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('roomLink').textContent=location.origin+location.pathname+'?room='+encodeURIComponent(roomName);
+    document.getElementById('roomLink').classList.add('show');
+
+    try {
+      if(CONFERENCE_CONFIG.tokenEndpoint.includes('YOUR-')) {
+        setConferenceState('DEMO UI');
+        showLocalMedia();
+        alert('Conference UI is ready. To enable real multi-user calls, connect the token/room endpoints in CONFERENCE_CONFIG to a LiveKit backend.');
+        return;
+      }
+
+      const tokenRes=await fetch(CONFERENCE_CONFIG.tokenEndpoint,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({roomName,identity:displayName,maxParticipants:capacity})
+      });
+      if(!tokenRes.ok) throw new Error('Token service returned '+tokenRes.status);
+      const data=await tokenRes.json();
+
+      // Load LiveKit browser SDK dynamically.
+      if(!window.LivekitClient){
+        await new Promise((resolve,reject)=>{
+          const sc=document.createElement('script');
+          sc.src='https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js';
+          sc.onload=resolve; sc.onerror=reject; document.head.appendChild(sc);
+        });
+      }
+      conferenceRoom=new LivekitClient.Room();
+      bindLiveKitEvents(conferenceRoom);
+      await conferenceRoom.connect(data.wsUrl || CONFERENCE_CONFIG.livekitWsUrl,data.token);
+      await conferenceRoom.localParticipant.setMicrophoneEnabled(true);
+      await conferenceRoom.localParticipant.setCameraEnabled(true);
+      setConferenceState('LIVE');
+      localMicOn=true; localCameraOn=true;
+      updateControlState();
+    } catch(err) {
+      console.error(err);
+      setConferenceState('CONNECTION ERROR');
+      alert('Could not connect to the conference service. Check your LiveKit backend/token endpoint.');
+    }
+  }
+
+  function bindLiveKitEvents(room){
+    room.on(LivekitClient.RoomEvent.TrackSubscribed,(track,publication,participant)=>{
+      attachRemoteTrack(track,participant);
+    });
+    room.on(LivekitClient.RoomEvent.TrackUnsubscribed,(track,publication,participant)=>{
+      const el=document.getElementById('remote-'+participant.identity);
+      if(el) el.remove();
+    });
+    room.on(LivekitClient.RoomEvent.ParticipantConnected, participant=>{
+      refreshParticipants();
+    });
+    room.on(LivekitClient.RoomEvent.ParticipantDisconnected, participant=>{
+      const tile=document.getElementById('remote-tile-'+participant.identity);
+      if(tile) tile.remove();
+      refreshParticipants();
+    });
+  }
+
+  function attachRemoteTrack(track,participant){
+    const tileId='remote-tile-'+participant.identity.replace(/[^a-zA-Z0-9_-]/g,'_');
+    let tile=document.getElementById(tileId);
+    if(!tile){
+      tile=document.createElement('div'); tile.className='video-tile'; tile.id=tileId;
+      tile.innerHTML='<div class="avatar">'+(participant.name||participant.identity).slice(0,2).toUpperCase()+'</div><span class="tile-name">'+(participant.name||participant.identity)+'</span>';
+      document.getElementById('videoGrid').appendChild(tile);
+    }
+    const media=track.attach();
+    media.id='remote-'+participant.identity;
+    media.autoplay=true; media.playsInline=true;
+    tile.appendChild(media);
+    refreshParticipants();
+  }
+
+  async function showLocalMedia(){
+    try{
+      if(!localStream) localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:true});
+      const v=document.getElementById('localVideo'); v.srcObject=localStream; v.play().catch(()=>{});
+      localMicOn=true; localCameraOn=true; updateControlState();
+    }catch(e){ alert('Camera/microphone permission was not granted.'); }
+  }
+
+  async function toggleMic(){
+    if(conferenceRoom){
+      localMicOn=!localMicOn;
+      await conferenceRoom.localParticipant.setMicrophoneEnabled(localMicOn);
+    }else{
+      if(!localStream) await showLocalMedia();
+      const t=localStream?.getAudioTracks()[0]; if(t){localMicOn=!localMicOn;t.enabled=localMicOn;}
+    }
+    updateControlState();
+  }
+
+  async function toggleCamera(){
+    if(conferenceRoom){
+      localCameraOn=!localCameraOn;
+      await conferenceRoom.localParticipant.setCameraEnabled(localCameraOn);
+    }else{
+      if(!localStream) await showLocalMedia();
+      const t=localStream?.getVideoTracks()[0]; if(t){localCameraOn=!localCameraOn;t.enabled=localCameraOn;}
+    }
+    updateControlState();
+  }
+
+  async function toggleScreen(){
+    if(conferenceRoom){
+      localScreenOn=!localScreenOn;
+      await conferenceRoom.localParticipant.setScreenShareEnabled(localScreenOn);
+    }else{
+      try{
+        if(!localScreenOn){
+          const screen=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+          const v=document.getElementById('localVideo'); v.srcObject=screen; v.play().catch(()=>{});
+          localScreenOn=true;
+          screen.getVideoTracks()[0].addEventListener('ended',()=>{localScreenOn=false;updateControlState();});
+        }else{
+          localScreenOn=false;
+          if(localStream) document.getElementById('localVideo').srcObject=localStream;
+        }
+      }catch(e){ console.warn('Screen share cancelled',e); }
+    }
+    updateControlState();
+  }
+
+  async function toggleRecording(){
+    if(serverRecording){ await stopServerRecording(); return; }
+    if(conferenceRoom){
+      try{
+        const res=await fetch(CONFERENCE_CONFIG.recordingEndpoint,{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({action:'start',roomName:document.getElementById('roomName').value.trim()})
+        });
+        if(!res.ok) throw new Error('recording endpoint failed');
+        serverRecording=true; setRecordingUI(true); return;
+      }catch(e){
+        console.warn('Server recording unavailable; using local recorder.',e);
+      }
+    }
+    await startLocalRecording();
+  }
+
+  async function startLocalRecording(){
+    try{
+      let stream=document.getElementById('localVideo').srcObject || localStream;
+      if(!stream) { await showLocalMedia(); stream=localStream; }
+      localRecordingChunks=[];
+      localRecorder=new MediaRecorder(stream);
+      localRecorder.ondataavailable=e=>{if(e.data.size)localRecordingChunks.push(e.data);}
+      localRecorder.onstop=()=>{
+        const blob=new Blob(localRecordingChunks,{type:'video/webm'});
+        if(localRecordingUrl) URL.revokeObjectURL(localRecordingUrl);
+        localRecordingUrl=URL.createObjectURL(blob);
+        document.getElementById('recBadge').dataset.url=localRecordingUrl;
+      };
+      localRecorder.start(1000); setRecordingUI(true);
+    }catch(e){alert('Recording is not supported by this browser or media stream.');}
+  }
+
+  async function stopServerRecording(){
+    try{
+      await fetch(CONFERENCE_CONFIG.recordingEndpoint,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'stop',roomName:document.getElementById('roomName').value.trim()})
+      });
+    }catch(e){console.warn(e);}
+    serverRecording=false; setRecordingUI(false);
+  }
+
+  function setRecordingUI(on){
+    document.getElementById('recBadge').classList.toggle('on',on);
+    document.getElementById('recordBtn').classList.toggle('active',on);
+    if(!on && localRecorder?.state==='recording') localRecorder.stop();
+    if(on) setConferenceState('RECORDING');
+    else if(conferenceRoom) setConferenceState('LIVE');
+  }
+
+  function downloadLocalRecording(){
+    if(!localRecordingUrl){alert('No local recording is ready yet. Start Record first.');return;}
+    const a=document.createElement('a');a.href=localRecordingUrl;a.download='summitjambo-conference.webm';a.click();
+  }
+
+  function updateControlState(){
+    document.getElementById('micBtn').classList.toggle('active',localMicOn);
+    document.getElementById('cameraBtn').classList.toggle('active',localCameraOn);
+    document.getElementById('screenBtn').classList.toggle('active',localScreenOn);
+    document.getElementById('micBtn').textContent=localMicOn?'🎙 Mic on':'🔇 Mic off';
+    document.getElementById('cameraBtn').textContent=localCameraOn?'📹 Camera on':'🚫 Camera off';
+    document.getElementById('screenBtn').textContent=localScreenOn?'🛑 Stop screen':'🖥 Share screen';
+    document.getElementById('localStatus').textContent=localScreenOn?'Screen sharing':(localCameraOn?'Camera on':'Camera off');
+  }
+
+  function refreshParticipants(){
+    if(!conferenceRoom) return;
+    const count=1+conferenceRoom.remoteParticipants.size;
+    document.getElementById('participantCount').textContent='('+count+')';
+  }
+
+  function toggleChatPanel(){
+    alert('Conference chat panel can be connected to LiveKit data messages or your existing messaging API.');
+  }
+
+  function copyRoomLink(){
+    const room=document.getElementById('roomName').value.trim()||'summit-demo';
+    const url=location.origin+location.pathname+'?room='+encodeURIComponent(room);
+    navigator.clipboard?.writeText(url);
+    document.getElementById('roomLink').textContent=url;
+    document.getElementById('roomLink').classList.add('show');
+  }
+
+  function leaveConference(){
+    if(conferenceRoom) { conferenceRoom.disconnect(); conferenceRoom=null; }
+    if(localRecorder?.state==='recording') localRecorder.stop();
+    if(localStream) localStream.getTracks().forEach(t=>t.stop());
+    localStream=null; localMicOn=false; localCameraOn=false; localScreenOn=false; serverRecording=false;
+    document.getElementById('localVideo').srcObject=null;
+    document.querySelectorAll('[id^="remote-tile-"]').forEach(e=>e.remove());
+    setConferenceState('READY'); updateControlState(); refreshParticipants();
+  }
+
+  // Auto-fill a room from ?room=...
+  (()=>{const room=new URLSearchParams(location.search).get('room');if(room)document.getElementById('roomName').value=room;})();
+
+
+  initJobs();
+</script>
+</body>
+</html>
